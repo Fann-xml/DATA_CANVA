@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Canva Pro</title>
+<style>
+  :root{
+    --purple-900:#2c1a4d;
+    --purple-700:#4a2f82;
+    --purple-500:#6c3fb5;
+    --purple-100:#efe7fb;
+    --ink:#1c1428;
+    --paper:#faf8fd;
+    --card:#ffffff;
+    --line:#e3dbf2;
+    --muted:#7a708f;
+    --ok-bg:#e5f6ec;
+    --ok-fg:#1e7d46;
+    --ok-line:#bfe8cf;
+    --warn-bg:#fff3d9;
+    --warn-fg:#8a5a00;
+    --warn-line:#f2dca0;
+    --bad-bg:#fdeaea;
+    --bad-fg:#a5222c;
+    --bad-line:#f4c3c6;
+    --focus:#6c3fb5;
+    --shadow: 0 1px 2px rgba(44,26,77,.06), 0 8px 24px rgba(44,26,77,.06);
+    --radius:10px;
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --ink:#efe9fb;
+      --paper:#161022;
+      --card:#1e1730;
+      --line:#332954;
+      --muted:#a49bc0;
+      --purple-100:#2a2044;
+      --ok-bg:#123322; --ok-fg:#7fe3ac; --ok-line:#1d4d33;
+      --warn-bg:#3a2c0c; --warn-fg:#f2c563; --warn-line:#5a4415;
+      --bad-bg:#3a1418; --bad-fg:#ff9aa2; --bad-line:#5c2027;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#efe9fb;
+    --paper:#161022;
+    --card:#1e1730;
+    --line:#332954;
+    --muted:#a49bc0;
+    --purple-100:#2a2044;
+    --ok-bg:#123322; --ok-fg:#7fe3ac; --ok-line:#1d4d33;
+    --warn-bg:#3a2c0c; --warn-fg:#f2c563; --warn-line:#5a4415;
+    --bad-bg:#3a1418; --bad-fg:#ff9aa2; --bad-line:#5c2027;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding:28px 20px 60px;
+    min-height:100vh;
+  }
+  .mono{font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;}
+
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  header.top{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    margin-bottom:22px;flex-wrap:wrap;
+  }
+  header.top h1{
+    font-size:1.5rem;margin:0 0 4px;font-weight:700;letter-spacing:-0.01em;
+    display:flex;align-items:center;gap:10px;
+  }
+  header.top h1 .badge{
+    width:30px;height:30px;border-radius:8px;background:var(--purple-700);
+    display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex:none;
+  }
+  header.top p{margin:0;color:var(--muted);font-size:.88rem;}
+  #syncStatus{display:inline-flex;align-items:center;gap:6px;margin-top:4px;}
+  #syncStatus .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none;}
+  #syncStatus.cloud .dot{background:var(--ok-fg);}
+  #syncStatus.local .dot{background:var(--warn-fg);}
+
+  .stats{display:flex;gap:10px;flex-wrap:wrap;}
+  .stat{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:10px 14px;min-width:96px;box-shadow:var(--shadow);
+  }
+  .stat .n{font-size:1.3rem;font-weight:700;line-height:1;}
+  .stat .l{font-size:.72rem;color:var(--muted);margin-top:4px;}
+  .stat.ok .n{color:var(--ok-fg);}
+  .stat.warn .n{color:var(--warn-fg);}
+  .stat.bad .n{color:var(--bad-fg);}
+
+  .toolbar{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .toolbar input[type=search], .toolbar select{
+    background:var(--card);border:1px solid var(--line);border-radius:8px;
+    padding:9px 12px;font-size:.88rem;color:var(--ink);
+  }
+  .toolbar input[type=search]{flex:1;min-width:180px;}
+  .toolbar input[type=search]:focus, .toolbar select:focus, button:focus-visible, input:focus-visible, textarea:focus-visible{
+    outline:2px solid var(--focus);outline-offset:1px;
+  }
+  .spacer{flex:1;}
+
+  button{
+    font-family:inherit;font-size:.88rem;font-weight:600;
+    border-radius:8px;border:1px solid transparent;cursor:pointer;
+    padding:9px 15px;transition:filter .15s, background .15s;
+  }
+  button.primary{background:var(--purple-700);color:#fff;}
+  button.primary:hover{filter:brightness(1.08);}
+  button.ghost{background:transparent;border-color:var(--line);color:var(--ink);}
+  button.ghost:hover{background:var(--purple-100);}
+  button.danger{background:transparent;color:var(--bad-fg);border-color:var(--bad-line);}
+  button.danger:hover{background:var(--bad-bg);}
+  button.icon{padding:6px 9px;}
+  button:disabled{opacity:.45;cursor:not-allowed;}
+
+  .table-scroll{
+    overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);
+    background:var(--card);box-shadow:var(--shadow);
+  }
+  table{width:100%;border-collapse:collapse;min-width:920px;}
+  thead th{
+    text-align:left;font-size:.74rem;font-weight:700;color:var(--muted);
+    padding:11px 14px;border-bottom:1px solid var(--line);
+    background:var(--purple-100);white-space:nowrap;position:sticky;top:0;
+    cursor:pointer;user-select:none;
+  }
+  thead th:hover{color:var(--ink);}
+  thead th .arrow{opacity:.5;font-size:.7em;margin-left:3px;}
+  tbody td{
+    padding:11px 14px;border-bottom:1px solid var(--line);font-size:.87rem;
+    vertical-align:middle;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--purple-100);}
+  td.email, td.pass{color:var(--muted);}
+  td.actions{white-space:nowrap;text-align:right;}
+  td.actions button{margin-left:4px;}
+
+  .pill{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:3px 9px;border-radius:999px;font-size:.74rem;font-weight:700;
+    border:1px solid transparent;white-space:nowrap;
+  }
+  .pill.ok{background:var(--ok-bg);color:var(--ok-fg);border-color:var(--ok-line);}
+  .pill.warn{background:var(--warn-bg);color:var(--warn-fg);border-color:var(--warn-line);}
+  .pill.bad{background:var(--bad-bg);color:var(--bad-fg);border-color:var(--bad-line);}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+  .empty{padding:50px 20px;text-align:center;color:var(--muted);}
+  .empty b{color:var(--ink);}
+
+  /* Modal */
+  .overlay{
+    position:fixed;inset:0;background:rgba(20,12,36,.45);
+    display:none;align-items:flex-start;justify-content:center;
+    padding:6vh 16px;overflow-y:auto;z-index:50;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    width:100%;max-width:460px;padding:22px;box-shadow:var(--shadow);
+  }
+  .modal h2{margin:0 0 4px;font-size:1.05rem;}
+  .modal p.sub{margin:0 0 18px;color:var(--muted);font-size:.82rem;}
+  .field{margin-bottom:13px;}
+  .field label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:5px;}
+  .field input, .field textarea, .field select{
+    width:100%;background:var(--paper);border:1px solid var(--line);border-radius:8px;
+    padding:9px 11px;font-size:.88rem;color:var(--ink);font-family:inherit;
+  }
+  .field textarea{resize:vertical;min-height:56px;}
+  .field .hint{font-size:.74rem;color:var(--muted);margin-top:4px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;}
+
+  footer{
+    text-align:center;color:var(--muted);font-size:.76rem;margin-top:26px;
+  }
+
+  /* Toast */
+  #toastWrap{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+    display:flex;flex-direction:column;gap:8px;z-index:80;
+    width:min(92vw,420px);
+  }
+  .toast{
+    background:var(--ink);color:var(--paper);border-radius:10px;
+    padding:11px 16px;font-size:.86rem;box-shadow:var(--shadow);
+    opacity:0;transform:translateY(8px);transition:opacity .2s, transform .2s;
+  }
+  .toast.show{opacity:1;transform:translateY(0);}
+  .toast.error{background:var(--bad-fg);}
+
+  /* Confirm dialog */
+  .confirm-modal{max-width:380px;}
+  .confirm-modal p{margin:0 0 4px;font-size:.92rem;line-height:1.5;}
+
+  @media (max-width:640px){
+    header.top{flex-direction:column;align-items:flex-start;}
+    .stats{width:100%;}
+    .stat{flex:1;min-width:0;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1><span class="badge">🗂️</span>Data Canva Pro</h1>
+      <p>Status berakhir dihitung otomatis: 1 tahun dari tanggal beli.</p>
+      <p id="syncStatus"><span class="dot"></span><span id="syncStatusText">Memeriksa penyimpanan…</span></p>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="toolbar">
+    <input type="search" id="search" placeholder="Cari nama, email, atau catatan…" autocomplete="off">
+    <select id="filterStatus">
+      <option value="all">Semua status</option>
+      <option value="aktif">Aktif</option>
+      <option value="segera">Segera berakhir (≤30 hari)</option>
+      <option value="hangus">Hangus</option>
+    </select>
+    <div class="spacer"></div>
+    <button class="ghost" id="exportBtn">Ekspor JSON</button>
+    <button class="ghost" id="importBtn">Impor JSON</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none;">
+    <button class="primary" id="addBtn">+ Tambah akun</button>
+  </div>
+
+  <div class="table-scroll">
+    <table id="table">
+      <thead>
+        <tr>
+          <th data-key="nama">Nama <span class="arrow"></span></th>
+          <th data-key="email">Akun email <span class="arrow"></span></th>
+          <th data-key="sandi">Sandi <span class="arrow"></span></th>
+          <th data-key="tanggalBeli">Tanggal beli <span class="arrow"></span></th>
+          <th data-key="berakhir">Berakhir <span class="arrow"></span></th>
+          <th data-key="status">Status <span class="arrow"></span></th>
+          <th>Catatan</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="emptyState" style="display:none;">
+      <b>Belum ada data.</b><br>Klik "+ Tambah akun" untuk mulai mencatat, atau impor file JSON yang sudah ada.
+    </div>
+  </div>
+
+  <footer id="footerNote">Data tersimpan otomatis.</footer>
+</div>
+
+<div id="toastWrap"></div>
+
+<div class="overlay" id="confirmOverlay">
+  <div class="modal confirm-modal">
+    <h2 id="confirmTitle">Konfirmasi</h2>
+    <p id="confirmMessage"></p>
+    <div class="modal-actions">
+      <button type="button" class="ghost" id="confirmNo">Batal</button>
+      <button type="button" class="primary" id="confirmYes">Ya, lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="modalTitle">Tambah akun</h2>
+    <p class="sub">Tanggal berakhir dihitung otomatis dari tanggal beli + 1 tahun.</p>
+    <form id="form">
+      <div class="field">
+        <label for="f-nama">Nama</label>
+        <input type="text" id="f-nama" placeholder="mis. Rozan" required>
+      </div>
+      <div class="field">
+        <label for="f-email">Akun email</label>
+        <input type="email" id="f-email" placeholder="nama@gmail.com">
+      </div>
+      <div class="field">
+        <label for="f-sandi">Sandi / paket</label>
+        <input type="text" id="f-sandi" placeholder="mis. CANVAPRO1TAHUN">
+      </div>
+      <div class="field">
+        <label for="f-tanggal">Tanggal beli</label>
+        <input type="date" id="f-tanggal" required>
+        <div class="hint" id="berakhirPreview"></div>
+      </div>
+      <div class="field">
+        <label for="f-catatan">Catatan</label>
+        <textarea id="f-catatan" placeholder="Opsional"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="ghost" id="cancelBtn">Batal</button>
+        <button type="submit" class="primary" id="saveBtn">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var state = { rows: [], editId: null, sortKey: "berakhir", sortDir: "asc",
+                search: "", filter: "all" };
+
+  // ---- seed data (dari data awal) ----
+  var SEED = [
+    ["NAMA","Canvapronyakak@gmail.com","CANVA1TAHUN","2024-09-07",""],
+    ["NAMA","canveypro2@gmail.com","CANVA1TAHUN","2024-09-11",""],
+    ["NAMA","editkuyyy@gmail.com","CANVAPRO1TAHUN","2024-10-08",""],
+    ["AYANG","cienugasterus@gmail.com","CANVAPRO1TAHUN","2024-10-09",""],
+    ["LOLO LALAK","masahabibpergi@gmail.com","CANVAPRO1TAHUN","2024-10-10",""],
+    ["PUNYADELLA","akuncanvapromax@gmail.com","CANVAPRO1TAHUN","2024-10-13",""],
+    ["NAMA","ngeditduls@gmail.com","CANVAPRO1TAHUN","2024-10-29",""],
+    ["LAELA","dasarlalak@gmail.com","CANVAPRO1TAHUN","2024-11-13",""],
+    ["LISA","apansilisul@gmail.com","CANVAPRO1TAHUN","2024-11-13",""],
+    ["SAFINA","iniakuncanva01@gmail.com","","2024-12-03",""],
+    ["NAMA","iniakuncanva02@gmail.com","","2024-12-03",""],
+    ["ROZAN","capcutnya01@gmail.com","CAPCUTPRO1TAHUN","2024-12-14",""],
+    ["NAMA","canv8033@gmail.com","CANVAPRO1TAHUN","2025-02-05",""],
+    ["NAMA","cancutt01@gmail.com","CANVAPRO1TAHUN","2025-02-20",""],
+    ["KHOIRUNNISA","adadasajaini@gmail.com","","2025-03-16",""],
+    ["NAMA","amrcanv03@gmail.com","","2025-05-03",""]
+  ].map(function(r){
+    return { nama:r[0], email:r[1], sandi:r[2], tanggalBeli:r[3], catatan:r[4] };
+  });
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+  // ---- toast & confirm kustom (dialog bawaan browser tidak selalu jalan di halaman artifact) ----
+  function toast(message, type){
+    var wrap = document.getElementById("toastWrap");
+    var el = document.createElement("div");
+    el.className = "toast" + (type==="error" ? " error" : "");
+    el.textContent = message;
+    wrap.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add("show"); });
+    setTimeout(function(){
+      el.classList.remove("show");
+      setTimeout(function(){ el.remove(); }, 250);
+    }, 3200);
+  }
+
+  var confirmOverlay = document.getElementById("confirmOverlay");
+  var confirmMessage = document.getElementById("confirmMessage");
+  var confirmYesBtn = document.getElementById("confirmYes");
+  var confirmNoBtn = document.getElementById("confirmNo");
+  function askConfirm(message, confirmLabel){
+    return new Promise(function(resolve){
+      confirmMessage.textContent = message;
+      confirmYesBtn.textContent = confirmLabel || "Ya, lanjutkan";
+      confirmOverlay.classList.add("open");
+      function cleanup(result){
+        confirmOverlay.classList.remove("open");
+        confirmYesBtn.removeEventListener("click", onYes);
+        confirmNoBtn.removeEventListener("click", onNo);
+        confirmOverlay.removeEventListener("click", onOverlay);
+        resolve(result);
+      }
+      function onYes(){ cleanup(true); }
+      function onNo(){ cleanup(false); }
+      function onOverlay(e){ if(e.target===confirmOverlay) cleanup(false); }
+      confirmYesBtn.addEventListener("click", onYes);
+      confirmNoBtn.addEventListener("click", onNo);
+      confirmOverlay.addEventListener("click", onOverlay);
+    });
+  }
+
+  // =====================================================================
+  // STORE: pakai penyimpanan cloud (capability "db") kalau tersedia,
+  // kalau tidak turun ke localStorage (per-perangkat saja).
+  // =====================================================================
+  var STORAGE_KEY = "canva-pro-data-v1";
+  var store = {
+    mode: "unknown", // "cloud" | "local"
+    onChange: function(){},
+    add: function(){},
+    update: function(){},
+    remove: function(){},
+    replaceAll: function(){}
+  };
+
+  function setSyncStatus(mode){
+    var el = document.getElementById("syncStatus");
+    var text = document.getElementById("syncStatusText");
+    var footer = document.getElementById("footerNote");
+    el.classList.remove("cloud","local");
+    if(mode==="cloud"){
+      el.classList.add("cloud");
+      text.textContent = "Tersimpan di cloud — sinkron otomatis di semua perangkat";
+      footer.textContent = "Data disimpan di server Claude untuk artifact ini. Semua orang yang membuka link ini melihat data yang sama, real-time.";
+    } else {
+      el.classList.add("local");
+      text.textContent = "Tersimpan lokal di perangkat/browser ini saja";
+      footer.textContent = "Data tersimpan di browser ini saja (localStorage) — tidak otomatis sinkron ke perangkat lain. Gunakan Ekspor/Impor JSON untuk memindahkan data.";
+    }
+  }
+
+  var SEED_JSON_FILE = "data-canva-pro.json";
+
+  function initLocalStore(){
+    store.mode = "local";
+    setSyncStatus("local");
+
+    function fallbackToHardcodedSeed(){
+      state.rows = SEED.map(function(r){ return Object.assign({id:uid()}, r); });
+      persist();
+      store.onChange();
+    }
+
+    function load(){
+      try{
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if(raw){
+          state.rows = JSON.parse(raw);
+          store.onChange();
+          return;
+        }
+      }catch(e){
+        console.error("Gagal memuat data tersimpan:", e);
+      }
+      // belum ada data lokal -> coba ambil data-canva-pro.json di folder yang sama
+      // (dipakai kalau file ini di-host, mis. lewat GitHub Pages, satu folder dengan JSON-nya)
+      fetch(SEED_JSON_FILE, { cache: "no-store" })
+        .then(function(res){ if(!res.ok) throw new Error("not found"); return res.json(); })
+        .then(function(parsed){
+          if(!Array.isArray(parsed) || !parsed.length) throw new Error("empty");
+          state.rows = parsed.map(function(r){ return Object.assign({id:r.id||uid()}, r); });
+          persist();
+          store.onChange();
+        })
+        .catch(function(){
+          // tidak ketemu / gagal diambil -> pakai data contoh bawaan di kode
+          fallbackToHardcodedSeed();
+        });
+    }
+    function persist(){
+      try{
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.rows));
+      }catch(e){
+        console.error("Gagal menyimpan data:", e);
+        toast("Gagal menyimpan data ke browser ini.", "error");
+      }
+    }
+
+    store.add = function(data){
+      state.rows.push(Object.assign({id:uid()}, data));
+      persist(); store.onChange();
+      return Promise.resolve();
+    };
+    store.update = function(id, data){
+      var idx = state.rows.findIndex(function(r){ return r.id===id; });
+      if(idx>-1) state.rows[idx] = Object.assign({}, state.rows[idx], data);
+      persist(); store.onChange();
+      return Promise.resolve();
+    };
+    store.remove = function(id){
+      state.rows = state.rows.filter(function(r){ return r.id!==id; });
+      persist(); store.onChange();
+      return Promise.resolve();
+    };
+    store.replaceAll = function(rows){
+      state.rows = rows.map(function(r){ return Object.assign({id:r.id||uid()}, r); });
+      persist(); store.onChange();
+      return Promise.resolve();
+    };
+
+    load();
+    store.onChange();
+  }
+
+  function initCloudStore(db){
+    store.mode = "cloud";
+    setSyncStatus("cloud");
+
+    var col = db.collection("accounts");
+
+    store.add = function(data){
+      return col.add(data).catch(function(err){
+        console.error("Gagal menambah data:", err);
+        toast("Gagal menyimpan ke cloud, coba lagi.", "error");
+      });
+    };
+    store.update = function(id, data){
+      return col.doc(id).update(data).catch(function(err){
+        console.error("Gagal mengubah data:", err);
+        toast("Gagal menyimpan perubahan ke cloud, coba lagi.", "error");
+      });
+    };
+    store.remove = function(id){
+      return col.doc(id).delete().catch(function(err){
+        console.error("Gagal menghapus data:", err);
+        toast("Gagal menghapus di cloud, coba lagi.", "error");
+      });
+    };
+    store.replaceAll = function(rows){
+      // hapus semua dokumen lama, lalu tambah yang baru (dipakai saat impor)
+      return col.get().then(function(snap){
+        return Promise.all(snap.docs.map(function(d){ return col.doc(d.id).delete(); }));
+      }).then(function(){
+        var chain = Promise.resolve();
+        rows.forEach(function(r){
+          var data = { nama:r.nama||"", email:r.email||"", sandi:r.sandi||"",
+                       tanggalBeli:r.tanggalBeli||"", catatan:r.catatan||"" };
+          chain = chain.then(function(){ return col.add(data); });
+        });
+        return chain;
+      }).catch(function(err){
+        console.error("Gagal mengimpor data:", err);
+        toast("Gagal mengimpor ke cloud, coba lagi.", "error");
+      });
+    };
+
+    // subscribe realtime
+    col.onSnapshot(function(snap){
+      state.rows = snap.docs.map(function(d){
+        return Object.assign({ id: d.id }, d.data());
+      });
+      store.onChange();
+    }, function(err){
+      console.error("Sinkronisasi cloud terputus:", err);
+    });
+
+    // seed sekali saja kalau koleksi masih kosong (pakai lease supaya tidak dobel
+    // walau dibuka dari beberapa perangkat bersamaan)
+    col.get().then(function(snap){
+      if(!snap.empty) return;
+      var lockDoc = db.doc("meta/seedLock");
+      return lockDoc.acquire({ holder: uid(), ttlMs: 15000 }).then(function(res){
+        if(!res.acquired) return;
+        return col.get().then(function(snap2){
+          if(!snap2.empty) return;
+          var chain = Promise.resolve();
+          SEED.forEach(function(r){
+            var data = { nama:r.nama, email:r.email, sandi:r.sandi, tanggalBeli:r.tanggalBeli, catatan:r.catatan };
+            chain = chain.then(function(){ return col.add(data); });
+          });
+          return chain;
+        });
+      });
+    }).catch(function(err){
+      console.error("Gagal memeriksa/mengisi data awal:", err);
+    });
+  }
+
+  function initStore(){
+    if (window.claude && typeof window.claude.use === "function"){
+      window.claude.use("db").then(function(db){
+        if(db){ initCloudStore(db); }
+        else { initLocalStore(); }
+      }).catch(function(){ initLocalStore(); });
+    } else {
+      initLocalStore();
+    }
+  }
+
+  // ---- tanggal helpers ----
+  function parseISO(iso){
+    if(!iso) return null;
+    var p = iso.split("-");
+    if(p.length!==3) return null;
+    var d = new Date(parseInt(p[0],10), parseInt(p[1],10)-1, parseInt(p[2],10));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function addOneYear(d){
+    var nd = new Date(d.getTime());
+    nd.setFullYear(nd.getFullYear()+1);
+    return nd;
+  }
+  function fmtDMY(d){
+    if(!d) return "—";
+    var dd = String(d.getDate()).padStart(2,"0");
+    var mm = String(d.getMonth()+1).padStart(2,"0");
+    var yyyy = d.getFullYear();
+    return dd+"/"+mm+"/"+yyyy;
+  }
+  function daysBetween(a,b){
+    var MS = 86400000;
+    var da = new Date(a.getFullYear(),a.getMonth(),a.getDate());
+    var db2 = new Date(b.getFullYear(),b.getMonth(),b.getDate());
+    return Math.round((db2-da)/MS);
+  }
+  function computeStatus(row){
+    var beli = parseISO(row.tanggalBeli);
+    if(!beli) return { berakhir:null, key:"unknown", label:"—", daysLeft:null };
+    var berakhir = addOneYear(beli);
+    var today = new Date();
+    var daysLeft = daysBetween(today, berakhir);
+    if(daysLeft < 0) return { berakhir:berakhir, key:"hangus", label:"Hangus", daysLeft:daysLeft };
+    if(daysLeft <= 30) return { berakhir:berakhir, key:"segera", label:"Segera berakhir", daysLeft:daysLeft };
+    return { berakhir:berakhir, key:"aktif", label:"Aktif", daysLeft:daysLeft };
+  }
+
+  function escapeHtml(s){
+    return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  // ---- render ----
+  var tbody = document.getElementById("tbody");
+  var emptyState = document.getElementById("emptyState");
+  var statsEl = document.getElementById("stats");
+
+  function render(){
+    var rows = state.rows.map(function(r){
+      var s = computeStatus(r);
+      return Object.assign({}, r, { _status: s });
+    });
+
+    var q = state.search.trim().toLowerCase();
+    if(q){
+      rows = rows.filter(function(r){
+        return (r.nama||"").toLowerCase().indexOf(q)>-1 ||
+               (r.email||"").toLowerCase().indexOf(q)>-1 ||
+               (r.catatan||"").toLowerCase().indexOf(q)>-1;
+      });
+    }
+    if(state.filter!=="all"){
+      rows = rows.filter(function(r){ return r._status.key === state.filter; });
+    }
+
+    rows.sort(function(a,b){
+      var ka, kb;
+      if(state.sortKey==="berakhir"){
+        ka = a._status.berakhir ? a._status.berakhir.getTime() : Infinity;
+        kb = b._status.berakhir ? b._status.berakhir.getTime() : Infinity;
+      } else if(state.sortKey==="tanggalBeli"){
+        ka = a.tanggalBeli||""; kb = b.tanggalBeli||"";
+      } else if(state.sortKey==="status"){
+        ka = a._status.key; kb = b._status.key;
+      } else {
+        ka = (a[state.sortKey]||"").toLowerCase();
+        kb = (b[state.sortKey]||"").toLowerCase();
+      }
+      if(ka<kb) return state.sortDir==="asc" ? -1 : 1;
+      if(ka>kb) return state.sortDir==="asc" ? 1 : -1;
+      return 0;
+    });
+
+    tbody.innerHTML = "";
+    emptyState.style.display = rows.length ? "none" : "block";
+
+    rows.forEach(function(r){
+      var tr = document.createElement("tr");
+      var s = r._status;
+      var pillClass = s.key==="aktif" ? "ok" : s.key==="segera" ? "warn" : s.key==="hangus" ? "bad" : "";
+      var pillText = s.key==="unknown" ? "—" :
+        s.key==="hangus" ? "Hangus (" + Math.abs(s.daysLeft) + " hari lalu)" :
+        s.key==="segera" ? "Segera (" + s.daysLeft + " hari lagi)" :
+        "Aktif (" + s.daysLeft + " hari lagi)";
+
+      tr.innerHTML =
+        '<td>'+escapeHtml(r.nama||"—")+'</td>'+
+        '<td class="email mono">'+escapeHtml(r.email||"—")+'</td>'+
+        '<td class="pass mono">'+escapeHtml(r.sandi||"—")+'</td>'+
+        '<td class="mono">'+(r.tanggalBeli ? fmtDMY(parseISO(r.tanggalBeli)) : "—")+'</td>'+
+        '<td class="mono">'+(s.berakhir ? fmtDMY(s.berakhir) : "—")+'</td>'+
+        '<td><span class="pill '+pillClass+'"><span class="dot"></span>'+pillText+'</span></td>'+
+        '<td>'+escapeHtml(r.catatan||"")+'</td>'+
+        '<td class="actions">'+
+          '<button class="ghost icon ed" data-id="'+r.id+'" title="Ubah">✏️</button>'+
+          '<button class="danger icon del" data-id="'+r.id+'" title="Hapus">🗑️</button>'+
+        '</td>';
+      tbody.appendChild(tr);
+    });
+
+    var allStatuses = state.rows.map(computeStatus);
+    var counts = { aktif:0, segera:0, hangus:0 };
+    allStatuses.forEach(function(s){ if(counts[s.key]!==undefined) counts[s.key]++; });
+    statsEl.innerHTML =
+      '<div class="stat"><div class="n">'+state.rows.length+'</div><div class="l">Total akun</div></div>'+
+      '<div class="stat ok"><div class="n">'+counts.aktif+'</div><div class="l">Aktif</div></div>'+
+      '<div class="stat warn"><div class="n">'+counts.segera+'</div><div class="l">≤30 hari</div></div>'+
+      '<div class="stat bad"><div class="n">'+counts.hangus+'</div><div class="l">Hangus</div></div>';
+
+    document.querySelectorAll("thead th[data-key]").forEach(function(th){
+      var arrow = th.querySelector(".arrow");
+      if(th.dataset.key === state.sortKey){
+        arrow.textContent = state.sortDir==="asc" ? "▲" : "▼";
+      } else {
+        arrow.textContent = "";
+      }
+    });
+  }
+
+  store.onChange = render;
+
+  // ---- events: sort ----
+  document.querySelectorAll("thead th[data-key]").forEach(function(th){
+    th.addEventListener("click", function(){
+      var key = th.dataset.key;
+      if(state.sortKey === key){
+        state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+      } else {
+        state.sortKey = key;
+        state.sortDir = "asc";
+      }
+      render();
+    });
+  });
+
+  document.getElementById("search").addEventListener("input", function(e){
+    state.search = e.target.value;
+    render();
+  });
+  document.getElementById("filterStatus").addEventListener("change", function(e){
+    state.filter = e.target.value;
+    render();
+  });
+
+  // ---- table row actions ----
+  tbody.addEventListener("click", function(e){
+    var edBtn = e.target.closest(".ed");
+    var delBtn = e.target.closest(".del");
+    if(edBtn){ openModal(edBtn.dataset.id); }
+    if(delBtn){
+      var row = state.rows.find(function(r){ return r.id===delBtn.dataset.id; });
+      if(row){
+        askConfirm('Hapus akun "'+(row.nama||row.email||"ini")+'"?', "Ya, hapus").then(function(ok){
+          if(ok){
+            store.remove(delBtn.dataset.id);
+            toast("Akun dihapus.");
+          }
+        });
+      }
+    }
+  });
+
+  // ---- modal ----
+  var overlay = document.getElementById("overlay");
+  var form = document.getElementById("form");
+  var modalTitle = document.getElementById("modalTitle");
+  var fNama = document.getElementById("f-nama");
+  var fEmail = document.getElementById("f-email");
+  var fSandi = document.getElementById("f-sandi");
+  var fTanggal = document.getElementById("f-tanggal");
+  var fCatatan = document.getElementById("f-catatan");
+  var berakhirPreview = document.getElementById("berakhirPreview");
+
+  function updatePreview(){
+    var d = parseISO(fTanggal.value);
+    berakhirPreview.textContent = d ? ("Akan berakhir: " + fmtDMY(addOneYear(d))) : "";
+  }
+  fTanggal.addEventListener("input", updatePreview);
+
+  function openModal(id){
+    state.editId = id || null;
+    if(id){
+      var row = state.rows.find(function(r){ return r.id===id; });
+      modalTitle.textContent = "Ubah akun";
+      fNama.value = row.nama||"";
+      fEmail.value = row.email||"";
+      fSandi.value = row.sandi||"";
+      fTanggal.value = row.tanggalBeli||"";
+      fCatatan.value = row.catatan||"";
+    } else {
+      modalTitle.textContent = "Tambah akun";
+      form.reset();
+      fTanggal.value = new Date().toISOString().slice(0,10);
+    }
+    updatePreview();
+    overlay.classList.add("open");
+    setTimeout(function(){ fNama.focus(); }, 30);
+  }
+  function closeModal(){
+    overlay.classList.remove("open");
+    state.editId = null;
+  }
+
+  document.getElementById("addBtn").addEventListener("click", function(){ openModal(null); });
+  document.getElementById("cancelBtn").addEventListener("click", closeModal);
+  overlay.addEventListener("click", function(e){ if(e.target===overlay) closeModal(); });
+  document.addEventListener("keydown", function(e){
+    if(e.key==="Escape" && overlay.classList.contains("open")) closeModal();
+  });
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    if(!fNama.value.trim() || !fTanggal.value){
+      toast("Nama dan tanggal beli wajib diisi.", "error");
+      return;
+    }
+    var data = {
+      nama: fNama.value.trim(),
+      email: fEmail.value.trim(),
+      sandi: fSandi.value.trim(),
+      tanggalBeli: fTanggal.value,
+      catatan: fCatatan.value.trim()
+    };
+    var isEdit = !!state.editId;
+    var task = isEdit ? store.update(state.editId, data) : store.add(data);
+    closeModal();
+    Promise.resolve(task).then(function(){
+      toast(isEdit ? "Perubahan disimpan." : "Akun ditambahkan.");
+    });
+  });
+
+  // ---- downloads capability (untuk ekspor file di halaman published) ----
+  var downloadsApi = null;
+  if (window.claude && typeof window.claude.use === "function"){
+    window.claude.use("downloads").then(function(ns){ downloadsApi = ns; }).catch(function(){ downloadsApi = null; });
+  }
+
+  // ---- export / import ----
+  document.getElementById("exportBtn").addEventListener("click", function(){
+    var json = JSON.stringify(state.rows, null, 2);
+    var filename = "data-canva-pro.json";
+
+    function fallbackDownload(){
+      try{
+        var blob = new Blob([json], {type:"application/json"});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }catch(e){
+        toast("Gagal mengekspor data.", "error");
+        console.error(e);
+      }
+    }
+
+    if(downloadsApi && typeof downloadsApi.save === "function"){
+      downloadsApi.save({ filename: filename, data: json }).catch(function(err){
+        var code = err && err.code;
+        if(code === "declined"){
+          // dibatalkan pengguna
+        } else if(code === "unavailable" || code === "not_granted" || code === "capability_disabled" || code === "capability_removed"){
+          fallbackDownload();
+        } else if(code === "rate_limited"){
+          toast("Sedang ada permintaan unduhan lain, coba lagi sebentar.", "error");
+        } else {
+          console.error(err);
+          fallbackDownload();
+        }
+      });
+    } else {
+      fallbackDownload();
+    }
+  });
+  document.getElementById("importBtn").addEventListener("click", function(){
+    document.getElementById("importFile").click();
+  });
+  document.getElementById("importFile").addEventListener("change", function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      try{
+        var parsed = JSON.parse(reader.result);
+        if(!Array.isArray(parsed)) throw new Error("Format tidak valid");
+        askConfirm("Impor akan MENGGANTI seluruh data saat ini ("+state.rows.length+" akun) dengan isi file ini ("+parsed.length+" akun). Lanjutkan?", "Ya, ganti semua").then(function(ok){
+          if(ok){
+            toast("Mengimpor data…");
+            Promise.resolve(store.replaceAll(parsed)).then(function(){
+              toast("Impor selesai — "+parsed.length+" akun tersimpan.");
+            });
+          }
+        });
+      }catch(err){
+        toast("File JSON tidak valid.", "error");
+        console.error(err);
+      }
+      e.target.value = "";
+    };
+    reader.readAsText(file);
+  });
+
+  // ---- init ----
+  initStore();
+})();
+</script>
+</body>
+</html>
